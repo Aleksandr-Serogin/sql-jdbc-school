@@ -1,1 +1,1 @@
-SELECT * FROM university.deletedCourseFromStudent(?, ?);
+SELECT * FROM university.deleteCourseFromStudent(?, ?);

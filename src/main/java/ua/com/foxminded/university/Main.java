@@ -19,7 +19,6 @@ public class Main {
      * @param args array of string arguments.
      */
     public static void main(String[] args) {
-
         Coordinator coordinator =new Coordinator();
         showMenu();
         coordinator.startCommandLine();

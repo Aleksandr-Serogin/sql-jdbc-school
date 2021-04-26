@@ -1,18 +1,16 @@
 package ua.com.foxminded.university.dao;
 
-import ua.com.foxminded.university.domain.DaoCourse;
-
 import java.util.List;
 
 public interface GeneralDao<T> {
 
-    void create(String nameProperties, T t);
+    void create(T t);
 
-    Object findById(String nameProperties, int id);
+    Object findById(int id);
 
-    List<T> findAll(String nameProperties);
+    List<T> findAll();
 
-    void update(String nameProperties, T t);
+    void update(T t);
 
-    void delete(String nameProperties, int id);
+    int delete(int id);
 }

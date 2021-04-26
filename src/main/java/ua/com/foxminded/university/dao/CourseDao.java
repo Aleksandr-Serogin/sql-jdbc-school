@@ -1,10 +1,14 @@
 package ua.com.foxminded.university.dao;
 
-import ua.com.foxminded.university.domain.DaoCourse;
+import ua.com.foxminded.university.domain.entity.Course;
 
-public interface CourseDao extends GeneralDao<DaoCourse> {
+import java.util.List;
 
-    void setCourseStudent(String nameProperties, int student_id, int course_id);
+public interface CourseDao extends GeneralDao<Course> {
 
-    void deletedCourseStudent(String nameProperties, int student_id, int course_id);
+    void setCourseStudent(int student_id, int course_id);
+
+    int deletedCourseStudent(int student_id, int course_id);
+
+    List<Course> findStudentCourseByStudentID(int id);
 }

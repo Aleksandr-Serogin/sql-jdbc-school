@@ -1,52 +1,51 @@
 package ua.com.foxminded.university.dao.postgres;
 
 import ua.com.foxminded.university.dao.DaoFactory;
-import ua.com.foxminded.university.domain.DaoCourse;
-import ua.com.foxminded.university.util.ReadSqlFile;
 import ua.com.foxminded.university.dao.StudentDao;
-import ua.com.foxminded.university.domain.DaoStudent;
+import ua.com.foxminded.university.domain.entity.Student;
+import ua.com.foxminded.university.util.ReadSqlFile;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PostgreSqlStudentDao implements StudentDao {
+public record StudentDaoImpl(DaoFactory daoFactory) implements StudentDao {
 
     @Override
-    public List<DaoStudent> findStudentsByCourse(String nameProperties, String group_name) {
+    public List<Student> findStudentsByCourseName(String course_name) {
         ReadSqlFile readSqlFile = new ReadSqlFile();
         String sql = readSqlFile.readFile("Find_all_students_related_to_course_with_given_name.sql");
-        DaoFactory daoFactory = new DaoFactory();
         Connection connection = null;
         PreparedStatement preparedStatement;
         ResultSet resultSet = null;
-        DaoStudent daoStudent = new DaoStudent();
-        List<DaoStudent> listStudents = new ArrayList<>();
+        Student student = new Student();
+        List<Student> listStudents = new ArrayList<>();
         try {
-            connection = daoFactory.getConnect(nameProperties);
+            connection = daoFactory.getConnect();
             preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setString(1, group_name);
-
+            preparedStatement.setString(1, course_name);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 int student_id = resultSet.getInt("student_id");
                 int group_id = resultSet.getInt("group_id");
                 String first_name = resultSet.getString("first_name");
                 String last_name = resultSet.getString("last_name");
-                daoStudent.setStudentId(student_id);
-                daoStudent.setGroupId(group_id);
-                daoStudent.setLastName(last_name);
-                daoStudent.setFirstName(first_name);
-                listStudents.add(daoStudent);
+                student.setStudentId(student_id);
+                student.setGroupId(group_id);
+                student.setLastName(last_name);
+                student.setFirstName(first_name);
+                listStudents.add(student);
             }
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
             try {
-                assert connection != null;
-                connection.close();
-                assert resultSet != null;
-                resultSet.close();
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }
@@ -55,56 +54,65 @@ public class PostgreSqlStudentDao implements StudentDao {
     }
 
     @Override
-    public void delete(String nameProperties, int id) {
+    public int delete(int id) {
         ReadSqlFile readSqlFile = new ReadSqlFile();
         String sql = readSqlFile.readFile("Delete_student_by_id.sql");
-        DaoFactory daoFactory = new DaoFactory();
         Connection connection = null;
-        PreparedStatement preparedStatement;
+        PreparedStatement preparedStatement = null;
+        int numberOfDeletedRows = 0;
+        ResultSet resultSet = null;
         try {
-            connection = daoFactory.getConnect(nameProperties);
+            connection = daoFactory.getConnect();
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, id);
-            preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                numberOfDeletedRows = resultSet.getInt(1);
+            }
         } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            throw new RuntimeException("Cannot delete course", throwables);
         } finally {
             try {
-                assert connection != null;
-                connection.close();
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }
         }
+        return numberOfDeletedRows;
     }
 
     @Override
-    public void create(String nameProperties, DaoStudent daoStudent) {
+    public void create(Student student) {
         ReadSqlFile readSqlFile = new ReadSqlFile();
         String sql = readSqlFile.readFile("Create_student.sql");
-        DaoFactory daoFactory = new DaoFactory();
         Connection connection = null;
         ResultSet resultSet = null;
         PreparedStatement preparedStatement;
         try {
-            connection = daoFactory.getConnect(nameProperties);
+            connection = daoFactory.getConnect();
             preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setInt(1, daoStudent.getGroupId());
-            preparedStatement.setString(2, daoStudent.getFirstName());
-            preparedStatement.setString(3, daoStudent.getLastName());
-            preparedStatement.execute();
-            resultSet = preparedStatement.getGeneratedKeys();
+            preparedStatement.setInt(1, student.getGroupId());
+            preparedStatement.setString(2, student.getFirstName());
+            preparedStatement.setString(3, student.getLastName());
+            resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                daoStudent.setStudentId(resultSet.getInt(1));
+                student.setStudentId(resultSet.getInt(1));
             }
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
             try {
-                assert connection != null;
-                connection.close();
-                assert resultSet != null;
-                resultSet.close();
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }
@@ -112,16 +120,15 @@ public class PostgreSqlStudentDao implements StudentDao {
     }
 
     @Override
-    public DaoStudent findById(String nameProperties, int id) {
+    public List<Student> findById(int id) {
         ReadSqlFile readSqlFile = new ReadSqlFile();
         String sql = readSqlFile.readFile("Find_student_by_id.sql");
-        DaoFactory daoFactory = new DaoFactory();
         Connection connection = null;
         PreparedStatement preparedStatement;
         ResultSet resultSet = null;
-        List<DaoStudent> daoStudents = new ArrayList<>();
+        List<Student> students = new ArrayList<>();
         try {
-            connection = daoFactory.getConnect(nameProperties);
+            connection = daoFactory.getConnect();
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, id);
             resultSet = preparedStatement.executeQuery();
@@ -130,42 +137,43 @@ public class PostgreSqlStudentDao implements StudentDao {
                 int group_id = resultSet.getInt("group_id");
                 String first_name = resultSet.getString("first_name");
                 String last_name = resultSet.getString("last_name");
-                DaoStudent daoStudent = new DaoStudent();
-                daoStudent.setStudentId(student_id);
-                daoStudent.setGroupId(group_id);
-                daoStudent.setLastName(last_name);
-                daoStudent.setFirstName(first_name);
-                daoStudents.add(daoStudent);
+                Student student = new Student();
+                student.setStudentId(student_id);
+                student.setGroupId(group_id);
+                student.setLastName(last_name);
+                student.setFirstName(first_name);
+                students.add(student);
             }
-            if (daoStudents.isEmpty()) {
+            if (students.isEmpty()) {
                 throw new RuntimeException("Not found eny student with id: " + id);
             }
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
             try {
-                assert connection != null;
-                connection.close();
-                assert resultSet != null;
-                resultSet.close();
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }
         }
-        return daoStudents.get(0);
+        return students;
     }
 
     @Override
-    public List<DaoStudent> findAll(String nameProperties) {
+    public List<Student> findAll() {
         ReadSqlFile readSqlFile = new ReadSqlFile();
         String sql = readSqlFile.readFile("Find_all_Students.sql");
-        DaoFactory daoFactory = new DaoFactory();
         Connection connection = null;
         PreparedStatement preparedStatement;
         ResultSet resultSet = null;
-        List<DaoStudent> daoStudents = new ArrayList<>();
+        List<Student> students = new ArrayList<>();
         try {
-            connection = daoFactory.getConnect(nameProperties);
+            connection = daoFactory.getConnect();
             preparedStatement = connection.prepareStatement(sql);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -173,53 +181,58 @@ public class PostgreSqlStudentDao implements StudentDao {
                 int group_id = resultSet.getInt("group_id");
                 String first_name = resultSet.getString("first_name");
                 String last_name = resultSet.getString("last_name");
-                DaoStudent daoStudent = new DaoStudent();
-                daoStudent.setStudentId(student_id);
-                daoStudent.setGroupId(group_id);
-                daoStudent.setLastName(last_name);
-                daoStudent.setFirstName(first_name);
-                daoStudents.add(daoStudent);
+                Student student = new Student();
+                student.setStudentId(student_id);
+                student.setGroupId(group_id);
+                student.setLastName(last_name);
+                student.setFirstName(first_name);
+                students.add(student);
             }
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
             try {
-                assert connection != null;
-                connection.close();
-                assert resultSet != null;
-                resultSet.close();
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }
         }
-        return daoStudents;
+        return students;
     }
 
     @Override
-    public void update(String nameProperties, DaoStudent daoStudent) {
+    public void update(Student student) {
         ReadSqlFile readSqlFile = new ReadSqlFile();
         String sql = readSqlFile.readFile("Update_student_by_id.sql");
-        DaoFactory daoFactory = new DaoFactory();
         Connection connection = null;
-        PreparedStatement preparedStatement;
+        PreparedStatement preparedStatement = null;
         try {
-            connection = daoFactory.getConnect(nameProperties);
+            connection = daoFactory.getConnect();
             preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setInt(1, daoStudent.getStudentId());
-            if (daoStudent.getGroupId() == 0) {
+            preparedStatement.setInt(1, student.getStudentId());
+            if (student.getGroupId() == 0) {
                 preparedStatement.setNull(2, Types.NULL);
             } else {
-                preparedStatement.setInt(2, daoStudent.getGroupId());
+                preparedStatement.setInt(2, student.getGroupId());
             }
-            preparedStatement.setString(3, daoStudent.getFirstName());
-            preparedStatement.setString(4, daoStudent.getLastName());
+            preparedStatement.setString(3, student.getFirstName());
+            preparedStatement.setString(4, student.getLastName());
             preparedStatement.executeQuery();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
             try {
-                assert connection != null;
-                connection.close();
+                if (preparedStatement != null) {
+                    preparedStatement.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }

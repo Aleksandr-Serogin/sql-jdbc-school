@@ -62,8 +62,6 @@ Useful links:
 
 Be aware that videos were made for the Java 6 course. Now we are using Java 8+.
 
-  
-
 https://youtu.be/bYyKQmYyGZg
   
  

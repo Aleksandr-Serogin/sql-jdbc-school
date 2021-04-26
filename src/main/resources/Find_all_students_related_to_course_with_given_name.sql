@@ -1,1 +1,1 @@
-SELECT * FROM university.findStudentsByGroupName(?);
+SELECT * FROM university.findStudentsByCourseName(?);

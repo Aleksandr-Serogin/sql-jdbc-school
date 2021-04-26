@@ -1,24 +1,26 @@
 package ua.com.foxminded.university.comandlineinterface;
 
-import ua.com.foxminded.university.dao.postgres.PostgreSqlCourseDao;
-import ua.com.foxminded.university.dao.postgres.PostgreSqlGroupDao;
-import ua.com.foxminded.university.dao.postgres.PostgreSqlStudentDao;
-import ua.com.foxminded.university.domain.DaoCourse;
-import ua.com.foxminded.university.domain.DaoGroup;
-import ua.com.foxminded.university.domain.DaoStudent;
+import ua.com.foxminded.university.dao.DaoFactory;
+import ua.com.foxminded.university.dao.postgres.CourseDaoImpl;
+import ua.com.foxminded.university.dao.postgres.GroupDaoImpl;
+import ua.com.foxminded.university.dao.postgres.StudentDaoImpl;
+import ua.com.foxminded.university.domain.entity.Course;
+import ua.com.foxminded.university.domain.entity.Group;
+import ua.com.foxminded.university.domain.entity.Student;
 
 import java.util.List;
 import java.util.Scanner;
 
 public class Coordinator {
 
+    private static final String namePropertiesFile = "config.properties";
     private static final String SPLITERATOR = ", ";
+    private static final DaoFactory daoFactory = new DaoFactory(namePropertiesFile);
+    private static final GroupDaoImpl groupDaoImpl = new GroupDaoImpl(daoFactory);
+    private static final CourseDaoImpl courseDaoImpl = new CourseDaoImpl(daoFactory);
+    private static final StudentDaoImpl studentDaoImpl = new StudentDaoImpl(daoFactory);
 
     public void startCommandLine() {
-        final String namePropertiesFile = "bd.properties";
-        PostgreSqlGroupDao postgreSqlGroupDao = new PostgreSqlGroupDao();
-        PostgreSqlCourseDao postgreSqlCourseDao = new PostgreSqlCourseDao();
-        PostgreSqlStudentDao postgreSqlStudentDao = new PostgreSqlStudentDao();
         Scanner scanner = new Scanner(System.in);
         while (true) {
             System.out.print("Input your request: ");
@@ -28,223 +30,84 @@ public class Coordinator {
             } else if ("a".equals(input)) {
                 System.out.print("Input count: ");
                 String answer = scanner.nextLine();
-                int numberStudents = Integer.parseInt(answer);
-                List<DaoGroup> groups = postgreSqlGroupDao.getGroupsWithLess_EqualsStudent(namePropertiesFile, numberStudents);
-                String message = String.format("All groups whose number of students less than %d: ", numberStudents);
-                System.out.println(message);
-                for (DaoGroup group : groups) {
-                    int id = group.getGroupId();
-                    String name = group.getGroupName();
-                    System.out.println(String.format("%d %s", id, name));
-                }
+                getGroupsWithLess_EqualsStudent(answer);
             } else if ("b".equals(input)) {
                 System.out.print("Input course name: ");
-                String courseName = scanner.nextLine();
-                List<DaoStudent> students = postgreSqlStudentDao.findStudentsByCourse(namePropertiesFile, courseName);
-                String message = String.format("All students that relate to course %s: ", courseName);
-                System.out.println(message);
-                for (DaoStudent student : students) {
-                    System.out.println(String.format("%d %d %s %s", student.getStudentId(), student.getGroupId(),
-                            student.getFirstName(), student.getLastName()));
-                }
+                String answer = scanner.nextLine();
+                findStudentsByCourse(answer);
             } else if ("c".equals(input)) {
                 System.out.print("Input student full name: <First Name> <Last Name>. Example: Jon Dou." + System.lineSeparator());
                 String answer = scanner.nextLine();
-                String[] nameStudent = answer.split(SPLITERATOR);
-                DaoStudent daoStudent = new DaoStudent();
-                daoStudent.setFirstName(nameStudent[0]);
-                daoStudent.setLastName(nameStudent[1]);
-                postgreSqlStudentDao.create(namePropertiesFile, daoStudent);
-                String message =
-                        String.format("Student %d %s %s has been added.", daoStudent.getStudentId(), nameStudent[0], nameStudent[1]);
-                System.out.println(message);
+                createStudent(answer);
             } else if ("d".equals(input)) {
                 System.out.print("Input student ID: ");
                 String answer = scanner.nextLine();
-                int studentID = Integer.parseInt(answer);
-                postgreSqlStudentDao.delete(namePropertiesFile, studentID);
-                String message =
-                        String.format("Student %d has been deleted.", studentID);
-                System.out.println(message);
+                deleteStudent(answer);
             } else if ("e".equals(input)) {
                 System.out.print("Input student id and course. Pattern: <student id> <course id>. Example: 150 15." + System.lineSeparator());
                 String answer = scanner.nextLine();
-                int studentID = Integer.parseInt(answer.split(SPLITERATOR)[0]);
-                int courseID = Integer.parseInt(answer.split(SPLITERATOR)[1]);
-                try {
-                    postgreSqlCourseDao.setCourseStudent(namePropertiesFile, studentID, courseID);
-                    String message = String.format("Student with id %d has been added to the course %d.",
-                            studentID, courseID);
-                    System.out.println(message);
-                } catch (RuntimeException e) {
-                    e.printStackTrace();
-                }
+                setCourseStudent(answer);
             } else if ("f".equals(input)) {
                 System.out.print("Input student id and his/her course. Pattern: <student id> <course id>." +
                         " Example: 150 15." + System.lineSeparator());
                 String answer = scanner.nextLine();
-                int studentID = Integer.parseInt(answer.split(SPLITERATOR)[0]);
-                int courseID = Integer.parseInt(answer.split(SPLITERATOR)[1]);
-                try {
-                    postgreSqlCourseDao.deletedCourseStudent(namePropertiesFile, studentID, courseID);
-                    String message =
-                            String.format("Student with id %d has been deleted from his/her %d course.",
-                                    studentID, courseID);
-                    System.out.println(message);
-                } catch (RuntimeException e) {
-                    e.printStackTrace();
-                }
+                deletedCourseStudent(answer);
             } else if ("g".equals(input)) {
                 System.out.print("Input course name and description: <Course Name>, <Course Description>." +
                         " Example: Mathematics, Higher mathematics" + System.lineSeparator());
                 String answer = scanner.nextLine();
-                String[] course = answer.split(",");
-                DaoCourse daoCourse = new DaoCourse();
-                daoCourse.setCourseName(course[0]);
-                daoCourse.setCourseDescription(course[1].substring(1));
-                postgreSqlCourseDao.create(namePropertiesFile, daoCourse);
-                String message =
-                        String.format("Course %d %s %s has been added.", daoCourse.getCourseId(), course[0], course[1]);
-                System.out.println(message);
+                createCourse(answer);
             } else if ("h".equals(input)) {
                 System.out.print("Input group name: <Group Name>." +
                         " Example: nh-23" + System.lineSeparator());
                 String answer = scanner.nextLine();
-                DaoGroup daoGroup = new DaoGroup();
-                daoGroup.setGroupName(answer);
-                postgreSqlGroupDao.create(namePropertiesFile, daoGroup);
-                String message =
-                        String.format("Group %d , %s has been added.", daoGroup.getGroupId(), answer);
-                System.out.println(message);
+                createGroup(answer);
             } else if ("i".equals(input)) {
                 System.out.print("Input course id: <id>." +
                         " Example: 23" + System.lineSeparator());
                 String answer = scanner.nextLine();
-                int id = Integer.parseInt(answer);
-                postgreSqlCourseDao.delete(namePropertiesFile, id);
-                String message =
-                        String.format("Course %d has been delete.", id);
-                System.out.println(message);
+                deleteCourse(answer);
             } else if ("k".equals(input)) {
                 System.out.print("Input group id: <id>." +
                         " Example: 23" + System.lineSeparator());
                 String answer = scanner.nextLine();
-                int id = Integer.parseInt(answer);
-                postgreSqlGroupDao.delete(namePropertiesFile, id);
-                String message =
-                        String.format("Group %d has been delete.", id);
-                System.out.println(message);
+                deleteGroup(answer);
             } else if ("l".equals(input)) {
                 System.out.print("Input student id, group id, first name, last name: <id, group, first name, last name>." +
                         " Example: 23, 10, Jon, Dou" + System.lineSeparator());
                 String answer = scanner.nextLine();
-                String[] student = answer.split(",");
-                int studentId = Integer.parseInt(student[0]);
-                int groupId = Integer.parseInt(student[1].substring(1));
-                String firstName = student[2].substring(1);
-                String lastName = student[3].substring(1);
-                DaoStudent daoStudent = new DaoStudent();
-                daoStudent.setStudentId(studentId);
-                daoStudent.setGroupId(groupId);
-                daoStudent.setFirstName(firstName);
-                daoStudent.setLastName(lastName);
-                postgreSqlStudentDao.update(namePropertiesFile, daoStudent);
-                String message =
-                        String.format("Student %d, %d, %s, %s has been update.", studentId, groupId, firstName, lastName);
-                System.out.println(message);
+                updateStudent(answer);
             } else if ("m".equals(input)) {
                 System.out.print("Input course id, name, description: <Course id, course name, course description>." +
                         " Example: 10, Mathematics, Higher mathematics" + System.lineSeparator());
                 String answer = scanner.nextLine();
-                String[] course = answer.split(",");
-                int courseId = Integer.parseInt(course[0]);
-                String courseName = course[1].substring(1);
-                String courseDescription = course[2].substring(1);
-                DaoCourse daoCourse = new DaoCourse();
-                daoCourse.setCourseId(courseId);
-                daoCourse.setCourseName(courseName);
-                daoCourse.setCourseDescription(courseDescription);
-                postgreSqlCourseDao.update(namePropertiesFile, daoCourse);
-                String message =
-                        String.format("Group %d , %s, %s has been update.", courseId, courseName, courseDescription);
-                System.out.println(message);
+                updateCourse(answer);
             } else if ("n".equals(input)) {
                 System.out.print("Input group id, name: <Group id, group name>." +
                         " Example: 10, 23-fg" + System.lineSeparator());
                 String answer = scanner.nextLine();
-                String[] course = answer.split(",");
-                int groupId = Integer.parseInt(course[0].substring(1));
-                String groupName = course[1];
-                DaoGroup daoGroup = new DaoGroup();
-                daoGroup.setGroupId(groupId);
-                daoGroup.setGroupName(groupName);
-                postgreSqlGroupDao.update(namePropertiesFile, daoGroup);
-                String message =
-                        String.format("Group %d , %s has been update.", groupId, groupName);
-                System.out.println(message);
+                updateGroup(answer);
             } else if ("o".equals(input)) {
-                List<DaoCourse> daoCourses = postgreSqlCourseDao.findAll(namePropertiesFile);
-                System.out.println("All courses at school:");
-                System.out.println("ID" + assemblyString(13) + "Name" + assemblyString(101) + "Description");
-                StringBuilder result = new StringBuilder();
-                daoCourses.forEach(daoCourse -> result
-                        .append(daoCourse.getCourseId())
-                        .append(makeDividerLensID(daoCourse.getCourseId()))
-                        .append(daoCourse.getCourseName())
-                        .append(makeDividerNameCourse(daoCourse.getCourseName()))
-                        .append(daoCourse.getCourseDescription())
-                        .append("\n"));
-                System.out.println(result);
+                findAllCourses();
             } else if ("p".equals(input)) {
-                List<DaoGroup> daoGroups = postgreSqlGroupDao.findAll(namePropertiesFile);
-                System.out.println("All groups at school:");
-                System.out.println("ID\tName");
-                for (DaoGroup daoGroup : daoGroups) {
-                    int groupId = daoGroup.getGroupId();
-                    String groupName = daoGroup.getGroupName();
-                    System.out.println(String.format("%d\t%s", groupId, groupName));
-                }
+                findAllGroups();
             } else if ("q".equals(input)) {
-                List<DaoStudent> daoStudents = postgreSqlStudentDao.findAll(namePropertiesFile);
-                System.out.println("All students at school:");
-                System.out.println("ID\t\tGroupID\tName");
-                for (DaoStudent daoStudent : daoStudents) {
-                    int studentId = daoStudent.getStudentId();
-                    int groupID = daoStudent.getGroupId();
-                    String firstName = daoStudent.getFirstName();
-                    String lastName = daoStudent.getLastName();
-                    System.out.println(String.format("%d\t\t%d\t\t%s %s", studentId, groupID, firstName, lastName));
-                }
+                findAllStudents();
             } else if ("r".equals(input)) {
                 System.out.print("Input student id: <id>." +
                         " Example: 10" + System.lineSeparator());
                 String answer = scanner.nextLine();
-                int id = Integer.parseInt(answer);
-                DaoStudent daoStudents = postgreSqlStudentDao.findById(namePropertiesFile, id);
-                String message =
-                        String.format("Student id: %d, group id: %d, name: %s %s.", daoStudents.getStudentId(),
-                                daoStudents.getGroupId(), daoStudents.getFirstName(), daoStudents.getLastName());
-                System.out.println(message);
-
+                findStudent(answer);
             } else if ("s".equals(input)) {
                 System.out.print("Input course id: <id>." +
                         " Example: 10" + System.lineSeparator());
                 String answer = scanner.nextLine();
-                int id = Integer.parseInt(answer);
-                DaoCourse daoCourse = postgreSqlCourseDao.findById(namePropertiesFile, id);
-                String message =
-                        String.format("Course id: %d, name: %s, description %s.", daoCourse.getCourseId(),
-                                daoCourse.getCourseName(), daoCourse.getCourseDescription());
-                System.out.println(message);
+                findCourse(answer);
             } else if ("t".equals(input)) {
                 System.out.print("Input group id: <id>." +
                         " Example: 10" + System.lineSeparator());
                 String answer = scanner.nextLine();
-                int id = Integer.parseInt(answer);
-                DaoGroup daoGroups = postgreSqlGroupDao.findById(namePropertiesFile, id);
-                String message =
-                        String.format("Group id: %d , name: %s.", daoGroups.getGroupId(), daoGroups.getGroupName());
-                System.out.println(message);
+                findGroup(answer);
             } else {
                 System.out.print("Wrong input. Try again.");
             }
@@ -272,6 +135,218 @@ public class Coordinator {
                 "s. Find course by COURSE_ID" + System.lineSeparator() +
                 "t. Find group by GROUP_ID" + System.lineSeparator();
         System.out.println(menu);
+    }
+
+    private void getGroupsWithLess_EqualsStudent(String answer) {
+        int numberStudents = Integer.parseInt(answer);
+        List<Group> groups = groupDaoImpl.getGroupsWithLess_EqualsStudent(numberStudents);
+        String message = String.format("All groups whose number of students less than %d: ", numberStudents);
+        System.out.println(message);
+        for (Group group : groups) {
+            int id = group.getGroupId();
+            String name = group.getGroupName();
+            System.out.println(String.format("%d %s", id, name));
+        }
+    }
+
+    private void findStudentsByCourse(String answer) {
+        List<Student> students = studentDaoImpl.findStudentsByCourseName(answer);
+        String message = String.format("All students that relate to course %s: ", answer);
+        System.out.println(message);
+        for (Student student : students) {
+            System.out.println(String.format("%d %d %s %s", student.getStudentId(), student.getGroupId(),
+                    student.getFirstName(), student.getLastName()));
+        }
+    }
+
+    private void createStudent(String answer) {
+        String[] nameStudent = answer.split(SPLITERATOR);
+        Student student = new Student();
+        student.setFirstName(nameStudent[0]);
+        student.setLastName(nameStudent[1]);
+        studentDaoImpl.create(student);
+        String message =
+                String.format("Student %d %s %s has been added.", student.getStudentId(), nameStudent[0], nameStudent[1]);
+        System.out.println(message);
+    }
+
+    private void setCourseStudent(String answer) {
+        int studentID = Integer.parseInt(answer.split(SPLITERATOR)[0]);
+        int courseID = Integer.parseInt(answer.split(SPLITERATOR)[1]);
+        courseDaoImpl.setCourseStudent(studentID, courseID);
+        String message = String.format("Student with id %d has been added to the course %d.",
+                studentID, courseID);
+        System.out.println(message);
+    }
+
+    private void deleteStudent(String answer) {
+        int studentID = Integer.parseInt(answer);
+        studentDaoImpl.delete(studentID);
+        String message =
+                String.format("Student %d has been deleted.", studentID);
+        System.out.println(message);
+    }
+
+    private void deletedCourseStudent(String answer) {
+        int studentID = Integer.parseInt(answer.split(SPLITERATOR)[0]);
+        int courseID = Integer.parseInt(answer.split(SPLITERATOR)[1]);
+        courseDaoImpl.deletedCourseStudent(studentID, courseID);
+        String message =
+                String.format("Student with id %d has been deleted from his/her %d course.",
+                        studentID, courseID);
+        System.out.println(message);
+    }
+
+    private void createCourse(String answer) {
+        String[] course = answer.split(",");
+        Course daoCourse = new Course();
+        daoCourse.setCourseName(course[0]);
+        daoCourse.setCourseDescription(course[1].substring(1));
+        courseDaoImpl.create(daoCourse);
+        String message =
+                String.format("Course %d %s %s has been added.", daoCourse.getCourseId(), course[0], course[1]);
+        System.out.println(message);
+    }
+
+    private void createGroup(String answer) {
+        Group group = new Group();
+        group.setGroupName(answer);
+        groupDaoImpl.create(group);
+        String message =
+                String.format("Group %d , %s has been added.", group.getGroupId(), answer);
+        System.out.println(message);
+    }
+
+    private void deleteCourse(String answer) {
+        int id = Integer.parseInt(answer);
+        courseDaoImpl.delete(id);
+        String message =
+                String.format("Course %d has been delete.", id);
+        System.out.println(message);
+    }
+
+    private void deleteGroup(String answer) {
+        int id = Integer.parseInt(answer);
+        groupDaoImpl.delete(id);
+        String message =
+                String.format("Group %d has been delete.", id);
+        System.out.println(message);
+    }
+
+    private void updateStudent(String answer) {
+        String[] student = answer.split(",");
+        int studentId = Integer.parseInt(student[0]);
+        int groupId = Integer.parseInt(student[1].substring(1));
+        String firstName = student[2].substring(1);
+        String lastName = student[3].substring(1);
+        Student daoStudent = new Student();
+        daoStudent.setStudentId(studentId);
+        daoStudent.setGroupId(groupId);
+        daoStudent.setFirstName(firstName);
+        daoStudent.setLastName(lastName);
+        studentDaoImpl.update(daoStudent);
+        String message =
+                String.format("Student %d, %d, %s, %s has been update.", studentId, groupId, firstName, lastName);
+        System.out.println(message);
+    }
+
+    private void updateCourse(String answer) {
+        String[] course = answer.split(",");
+        int courseId = Integer.parseInt(course[0]);
+        String courseName = course[1].substring(1);
+        String courseDescription = course[2].substring(1);
+        Course daoCourse = new Course();
+        daoCourse.setCourseId(courseId);
+        daoCourse.setCourseName(courseName);
+        daoCourse.setCourseDescription(courseDescription);
+        courseDaoImpl.update(daoCourse);
+        String message =
+                String.format("Group %d , %s, %s has been update.", courseId, courseName, courseDescription);
+        System.out.println(message);
+    }
+
+    private void updateGroup(String answer) {
+        String[] course = answer.split(",");
+        int groupId = Integer.parseInt(course[0].substring(1));
+        String groupName = course[1];
+        Group group = new Group();
+        group.setGroupId(groupId);
+        group.setGroupName(groupName);
+        groupDaoImpl.update(group);
+        String message =
+                String.format("Group %d , %s has been update.", groupId, groupName);
+        System.out.println(message);
+    }
+
+    private void findAllCourses() {
+        List<Course> courses = courseDaoImpl.findAll();
+        System.out.println("All courses at school:");
+        System.out.println("ID" + assemblyString(13) + "Name" + assemblyString(101) + "Description");
+        StringBuilder result = new StringBuilder();
+        courses.forEach(course -> result
+                .append(course.getCourseId())
+                .append(makeDividerLensID(course.getCourseId()))
+                .append(course.getCourseName())
+                .append(makeDividerNameCourse(course.getCourseName()))
+                .append(course.getCourseDescription())
+                .append("\n"));
+        System.out.println(result);
+    }
+
+    private void findAllGroups() {
+        List<Group> groups = groupDaoImpl.findAll();
+        System.out.println("All groups at school:");
+        System.out.println("ID\tName");
+        for (
+                Group group : groups) {
+            int groupId = group.getGroupId();
+            String groupName = group.getGroupName();
+            System.out.println(String.format("%d\t%s", groupId, groupName));
+        }
+    }
+
+    private void findAllStudents() {
+        List<Student> students = studentDaoImpl.findAll();
+        System.out.println("All students at school:");
+        System.out.println("ID\t\tGroupID\tName");
+        for (Student student : students) {
+            int studentId = student.getStudentId();
+            int groupID = student.getGroupId();
+            String firstName = student.getFirstName();
+            String lastName = student.getLastName();
+            System.out.println(String.format("%d\t\t%d\t\t%s %s", studentId, groupID, firstName, lastName));
+        }
+    }
+
+    private void findStudent(String answer) {
+        int id = Integer.parseInt(answer);
+        List<Student> students  = studentDaoImpl.findById(id);
+        for (Student student : students) {
+            int studentId = student.getStudentId();
+            int groupID = student.getGroupId();
+            String firstName = student.getFirstName();
+            String lastName = student.getLastName();
+            System.out.println(String.format("%d\t\t%d\t\t%s %s", studentId, groupID, firstName, lastName));
+        }
+    }
+
+    private void findCourse(String answer) {
+        int id = Integer.parseInt(answer);
+        List<Course> courses = courseDaoImpl.findById(id);
+        for (Course course : courses) {
+            System.out.println(String.format("Course id: %d, name: %s, description: %s.", course.getCourseId(),
+                    course.getCourseName(), course.getCourseDescription()));
+        }
+    }
+
+    private void findGroup(String answer) {
+        int id = Integer.parseInt(answer);
+        List<Group> groups = groupDaoImpl.findById(id);
+        for (Group group : groups) {
+            int groupId = group.getGroupId();
+            String groupName = group.getGroupName();
+            System.out.println(String.format("Group id: %d , name: %s.", groupId, groupName));
+        }
     }
 
     private String makeDividerLensID(int id) { // append in string tabs and dash

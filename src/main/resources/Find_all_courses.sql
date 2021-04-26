@@ -1,1 +1,1 @@
-SELECT * FROM university.selectAllCourses();
+SELECT * FROM university.findAllCourses();

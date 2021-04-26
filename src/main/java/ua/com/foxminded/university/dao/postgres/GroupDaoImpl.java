@@ -2,9 +2,8 @@ package ua.com.foxminded.university.dao.postgres;
 
 import ua.com.foxminded.university.dao.DaoFactory;
 import ua.com.foxminded.university.dao.GroupDao;
-import ua.com.foxminded.university.domain.DaoCourse;
 import ua.com.foxminded.university.util.ReadSqlFile;
-import ua.com.foxminded.university.domain.DaoGroup;
+import ua.com.foxminded.university.domain.entity.Group;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,63 +12,74 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PostgreSqlGroupDao implements GroupDao {
+public record GroupDaoImpl(DaoFactory daoFactory) implements GroupDao {
 
     @Override
-    public List<DaoGroup> getGroupsWithLess_EqualsStudent(String nameProperties, int number) {
+    public List<Group> getGroupsWithLess_EqualsStudent(int number) {
         ReadSqlFile readSqlFile = new ReadSqlFile();
         String sql = readSqlFile.readFile("Finds_if_any_of_the_groups_has_less_than_equals_students.sql");
-        DaoFactory daoFactory = new DaoFactory();
         Connection connection = null;
         PreparedStatement preparedStatement;
         ResultSet resultSet = null;
-        DaoGroup daoGroup = new DaoGroup();
-        List<DaoGroup> listGroups = new ArrayList<>();
+        Group group = new Group();
+        List<Group> groups = new ArrayList<>();
         try {
-            connection = daoFactory.getConnect(nameProperties);
+            connection = daoFactory.getConnect();
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, number);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 int group_id = resultSet.getInt("group_id");
                 String group_name = resultSet.getString("group_name");
-                daoGroup.setGroupId(group_id);
-                daoGroup.setGroupName(group_name);
-                listGroups.add(daoGroup);
+                group.setGroupId(group_id);
+                group.setGroupName(group_name);
+                groups.add(group);
+            }
+            if (groups.isEmpty()) {
+                throw new RuntimeException("Not found eny group with number student: " + number);
             }
         } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            throw new RuntimeException("Cannot find eny groups", throwables);
         } finally {
             try {
-                assert resultSet != null;
-                resultSet.close();
-                connection.close();
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }
         }
-        return listGroups;
+        return groups;
     }
 
     @Override
-    public void create(String nameProperties, DaoGroup daoGroup) {
+    public void create(Group group) {
         ReadSqlFile readSqlFile = new ReadSqlFile();
         String sql = readSqlFile.readFile("Create_group.sql");
-        DaoFactory daoFactory = new DaoFactory();
         Connection connection = null;
         PreparedStatement preparedStatement;
+        ResultSet resultSet = null;
         try {
-            connection = daoFactory.getConnect(nameProperties);
+            connection = daoFactory.getConnect();
             preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setInt(1, daoGroup.getGroupId());
-            preparedStatement.setString(2, daoGroup.getGroupName());
-            preparedStatement.executeQuery();
+            preparedStatement.setString(1, group.getGroupName());
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                group.setGroupId(resultSet.getInt(1));
+            }
         } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            throw new RuntimeException("Cannot create group", throwables);
         } finally {
             try {
-                assert connection != null;
-                connection.close();
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }
@@ -77,96 +87,105 @@ public class PostgreSqlGroupDao implements GroupDao {
     }
 
     @Override
-    public DaoGroup findById(String nameProperties, int id) {
+    public List<Group> findById(int id) {
         ReadSqlFile readSqlFile = new ReadSqlFile();
         String sql = readSqlFile.readFile("Find_group_by_id.sql");
-        DaoFactory daoFactory = new DaoFactory();
         Connection connection = null;
-        List<DaoGroup> daoGroups = new ArrayList<>();
+        List<Group> groups = new ArrayList<>();
         PreparedStatement preparedStatement;
-        ResultSet resultSet;
+        ResultSet resultSet = null;
         try {
-            connection = daoFactory.getConnect(nameProperties);
+            connection = daoFactory.getConnect();
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, id);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 int group_id = resultSet.getInt("group_id");
                 String group_name = resultSet.getString("group_name");
-                DaoGroup daoGroup = new DaoGroup();
-                daoGroup.setGroupId(group_id);
-                daoGroup.setGroupName(group_name);
-                daoGroups.add(daoGroup);
+                Group group = new Group();
+                group.setGroupId(group_id);
+                group.setGroupName(group_name);
+                groups.add(group);
             }
-            if (daoGroups.isEmpty()){
-                throw new RuntimeException("Not found eny group with id: " +id);
+            if (groups.isEmpty()) {
+                throw new RuntimeException("Not found eny group with id: " + id);
             }
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
             try {
-                assert connection != null;
-                connection.close();
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }
         }
-        return daoGroups.get(0);
+        return groups;
     }
 
     @Override
-    public List<DaoGroup> findAll(String nameProperties) {
+    public List<Group> findAll() {
         ReadSqlFile readSqlFile = new ReadSqlFile();
         String sql = readSqlFile.readFile("Find_all_group.sql");
-        DaoFactory daoFactory = new DaoFactory();
         Connection connection = null;
         PreparedStatement preparedStatement;
-        ResultSet resultSet;
-        List<DaoGroup> daoGroups = new ArrayList<>();
+        ResultSet resultSet = null;
+        List<Group> groups = new ArrayList<>();
         try {
-            connection = daoFactory.getConnect(nameProperties);
+            connection = daoFactory.getConnect();
             preparedStatement = connection.prepareStatement(sql);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 int group_id = resultSet.getInt("group_id");
                 String group_name = resultSet.getString("group_name");
-                DaoGroup daoGroup = new DaoGroup();
-                daoGroup.setGroupId(group_id);
-                daoGroup.setGroupName(group_name);
-                daoGroups.add(daoGroup);
+                Group group = new Group();
+                group.setGroupId(group_id);
+                group.setGroupName(group_name);
+                groups.add(group);
             }
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
             try {
-                assert connection != null;
-                connection.close();
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }
         }
-        return daoGroups;
+        return groups;
     }
 
     @Override
-    public void update(String nameProperties, DaoGroup daoGroup) {
+    public void update(Group group) {
         ReadSqlFile readSqlFile = new ReadSqlFile();
         String sql = readSqlFile.readFile("Update_group_by_id.sql");
-        DaoFactory daoFactory = new DaoFactory();
         Connection connection = null;
-        PreparedStatement preparedStatement;
+        PreparedStatement preparedStatement = null;
         try {
-            connection = daoFactory.getConnect(nameProperties);
+            connection = daoFactory.getConnect();
             preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setString(1, daoGroup.getGroupName());
-            preparedStatement.setInt(2, daoGroup.getGroupId());
+            preparedStatement.setInt(1, group.getGroupId());
+            preparedStatement.setString(2, group.getGroupName());
             preparedStatement.executeQuery();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
             try {
-                assert connection != null;
-                connection.close();
+                if (preparedStatement != null) {
+                    preparedStatement.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }
@@ -174,26 +193,35 @@ public class PostgreSqlGroupDao implements GroupDao {
     }
 
     @Override
-    public void delete(String nameProperties, int id) {
+    public int delete(int id) {
         ReadSqlFile readSqlFile = new ReadSqlFile();
         String sql = readSqlFile.readFile("Delete_group_by_id.sql");
-        DaoFactory daoFactory = new DaoFactory();
         Connection connection = null;
         PreparedStatement preparedStatement;
+        int numberOfDeletedRows = 0;
+        ResultSet resultSet = null;
         try {
-            connection = daoFactory.getConnect(nameProperties);
+            connection = daoFactory.getConnect();
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, id);
-            preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                numberOfDeletedRows = resultSet.getInt(1);
+            }
         } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            throw new RuntimeException("Cannot delete course", throwables);
         } finally {
             try {
-                assert connection != null;
-                connection.close();
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }
         }
+        return numberOfDeletedRows;
     }
 }

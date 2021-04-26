@@ -1,1 +1,1 @@
-SELECT FROM university.createGroup(?, ?)
+SELECT * FROM university.createGroup(?)

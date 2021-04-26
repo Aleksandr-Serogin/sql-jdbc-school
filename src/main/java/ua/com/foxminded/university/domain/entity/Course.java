@@ -1,12 +1,12 @@
-package ua.com.foxminded.university.domain;
+package ua.com.foxminded.university.domain.entity;
 
-public class DaoCourse {
+public class Course {
 
     private int course_id;
     private String course_name;
     private String course_description;
 
-    public DaoCourse(){
+    public Course(){
 
     }
 
@@ -35,11 +35,10 @@ public class DaoCourse {
     }
 
     @Override
-    public String toString() {
-        return "DaoCourse{" +
-               "course_id=" + course_id +
-               ", course_name='" + course_name + '\'' +
-               ", course_description='" + course_description + '\'' +
-               '}';
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Course course = (Course) o;
+        return course_id == course.course_id && course_name.equals(course.course_name) && course_description.equals(course.course_description);
     }
 }

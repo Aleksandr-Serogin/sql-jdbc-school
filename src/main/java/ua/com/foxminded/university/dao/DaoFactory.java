@@ -9,8 +9,14 @@ import java.util.Properties;
 
 public class DaoFactory implements IDaoFactory {
 
+    private final String nameFileProperties;
+
+    public DaoFactory(String  nameFileProperties) {
+        this.nameFileProperties = nameFileProperties;
+    }
+
     @Override
-    public Connection getConnect(String  nameFileProperties) throws SQLException {
+    public Connection getConnect() throws SQLException {
         ReadProperties readProperties = new ReadProperties (nameFileProperties);
         String url = readProperties.getUrl ();
         Properties props = new Properties();

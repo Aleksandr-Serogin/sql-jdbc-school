@@ -1,9 +1,11 @@
 package ua.com.foxminded.university.dao;
 
-import ua.com.foxminded.university.domain.DaoStudent;
+import ua.com.foxminded.university.domain.entity.Student;
 
 import java.util.List;
 
-public interface StudentDao extends GeneralDao <DaoStudent>  {
-    List<DaoStudent> findStudentsByCourse(String nameProperties, String group_name);
+public interface StudentDao extends GeneralDao <Student>  {
+
+    List<Student> findStudentsByCourseName(String group_name);
+
 }

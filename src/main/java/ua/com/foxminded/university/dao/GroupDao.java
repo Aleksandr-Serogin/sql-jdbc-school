@@ -1,10 +1,10 @@
 package ua.com.foxminded.university.dao;
 
-import ua.com.foxminded.university.domain.DaoGroup;
+import ua.com.foxminded.university.domain.entity.Group;
 
 import java.util.List;
 
-public interface GroupDao extends GeneralDao <DaoGroup> {
+public interface GroupDao extends GeneralDao <Group> {
 
-    List<DaoGroup> getGroupsWithLess_EqualsStudent(String nameProperties, int number);
+    List<Group> getGroupsWithLess_EqualsStudent(int number);
 }

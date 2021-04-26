@@ -1,12 +1,12 @@
-package ua.com.foxminded.university.domain;
+package ua.com.foxminded.university.domain.entity;
 
-public class DaoStudent {
+public class Student {
     private int student_id;
     private int group_id;
     private String first_name;
     private String last_name;
 
-    public DaoStudent(){
+    public Student(){
 
     }
 
@@ -43,12 +43,15 @@ public class DaoStudent {
     }
 
     @Override
-    public String toString() {
-        return "DaoStudent{" +
-                "student_id=" + student_id +
-                ", group_id=" + group_id +
-                ", first_name='" + first_name + '\'' +
-                ", last_name='" + last_name + '\'' +
-                '}';
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Student student = (Student) o;
+
+        if (student_id != student.student_id) return false;
+        if (group_id != student.group_id) return false;
+        if (!first_name.equals(student.first_name)) return false;
+        return last_name.equals(student.last_name);
     }
 }

@@ -5,5 +5,5 @@ import java.sql.SQLException;
 
 public interface IDaoFactory {
 
-    Connection getConnect(String nameFileProperties) throws SQLException;
+    Connection getConnect() throws SQLException;
 }
