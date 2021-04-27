@@ -55,7 +55,7 @@ class StudentDaoImplTest {
     void create_shouldReturnCorrectIdCourse_whenCorrectDataInserted() {
         Student testStudent = new Student();
         testStudent.setStudentId(201);
-        testStudent.setGroupId(10);
+        testStudent.setGroupId(0);
         testStudent.setFirstName("Test");
         testStudent.setLastName("Test");
         studentDao.create(testStudent);
@@ -88,7 +88,7 @@ class StudentDaoImplTest {
     }
 
     @Test
-    void update() {
+    void update_shouldReturnUpdateStudent() {
         Student testStudent = new Student();
         testStudent.setStudentId(200);
         testStudent.setGroupId(10);

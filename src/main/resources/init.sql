@@ -97,15 +97,16 @@ BEGIN
 END;
 $$ LANGUAGE 'plpgsql';
 
-CREATE OR REPLACE FUNCTION university.createStudent(id INTEGER, f_name VARCHAR, l_name VARCHAR, OUT s_id int)
+CREATE OR REPLACE FUNCTION university.createStudent(f_name VARCHAR, l_name VARCHAR, OUT s_id int)
 AS
 $$
 BEGIN
-    INSERT INTO university.students (group_id, first_name, last_name)
-    VALUES (id, f_name, l_name)
+    INSERT INTO university.students (first_name, last_name)
+    VALUES (f_name, l_name)
     RETURNING student_id INTO s_id;
 END;
 $$ LANGUAGE 'plpgsql';
+
 
 CREATE OR REPLACE FUNCTION university.deleteStudentById(id INTEGER)
     RETURNS int

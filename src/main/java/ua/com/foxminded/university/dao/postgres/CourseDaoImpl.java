@@ -9,8 +9,19 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Date: Apr 27-2021 Class get connect to data base,
+ * return and work with class course object
+ *
+ * @author Aleksandr Serohin
+ * @version 1.0001
+ */
 public record CourseDaoImpl(DaoFactory daoFactory) implements CourseDao {
 
+    /**
+     * @param student_id id student for set him course
+     * @param course_id id course for set zem student
+     */
     @Override
     public void setCourseStudent(int student_id, int course_id) {
         ReadSqlFile readSqlFile = new ReadSqlFile();
@@ -39,6 +50,11 @@ public record CourseDaoImpl(DaoFactory daoFactory) implements CourseDao {
         }
     }
 
+    /**
+     * @param student_id ID student for delete him from course
+     * @param course_id Course ID to remove from the student
+     * @return number of deleted rows
+     */
     @Override
     public int deletedCourseStudent(int student_id, int course_id) {
         ReadSqlFile readSqlFile = new ReadSqlFile();
@@ -74,6 +90,9 @@ public record CourseDaoImpl(DaoFactory daoFactory) implements CourseDao {
     }
 
 
+    /**
+     * @return list of found courses
+     */
     @Override
     public List<Course> findAll() {
         ReadSqlFile readSqlFile = new ReadSqlFile();
@@ -113,6 +132,10 @@ public record CourseDaoImpl(DaoFactory daoFactory) implements CourseDao {
         return courses;
     }
 
+    /**
+     * @param id Student ID to find his courses
+     * @return list of found courses
+     */
     @Override
     public List<Course> findStudentCourseByStudentID(int id) {
         ReadSqlFile readSqlFile = new ReadSqlFile();
@@ -153,6 +176,9 @@ public record CourseDaoImpl(DaoFactory daoFactory) implements CourseDao {
         return courses;
     }
 
+    /**
+     * @param course  Class course object  with parameter to create group in db
+     */
     @Override
     public void create(Course course) {
         ReadSqlFile readSqlFile = new ReadSqlFile();
@@ -185,6 +211,10 @@ public record CourseDaoImpl(DaoFactory daoFactory) implements CourseDao {
         }
     }
 
+    /**
+     * @param id Course id for search
+     * @return list of found courses
+     */
     @Override
     public List<Course> findById(int id) {
         ReadSqlFile readSqlFile = new ReadSqlFile();
@@ -228,6 +258,9 @@ public record CourseDaoImpl(DaoFactory daoFactory) implements CourseDao {
         return courses;
     }
 
+    /**
+     * @param course  Class course object  with parameter to update group in db
+     */
     @Override
     public void update(Course course) {
         ReadSqlFile readSqlFile = new ReadSqlFile();
@@ -257,6 +290,10 @@ public record CourseDaoImpl(DaoFactory daoFactory) implements CourseDao {
         }
     }
 
+    /**
+     * @param id Course id for delete
+     * @return number of deleted rows
+     */
     @Override
     public int delete(int id) {
         ReadSqlFile readSqlFile = new ReadSqlFile();

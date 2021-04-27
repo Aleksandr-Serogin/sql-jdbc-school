@@ -12,8 +12,19 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Date: Apr 27-2021 Class get connect to data base,
+ * return and work with class group object
+ *
+ * @author Aleksandr Serohin
+ * @version 1.0001
+ */
 public record GroupDaoImpl(DaoFactory daoFactory) implements GroupDao {
 
+    /**
+     * @param number number student in group for search
+     * @return list find group
+     */
     @Override
     public List<Group> getGroupsWithLess_EqualsStudent(int number) {
         ReadSqlFile readSqlFile = new ReadSqlFile();
@@ -21,7 +32,6 @@ public record GroupDaoImpl(DaoFactory daoFactory) implements GroupDao {
         Connection connection = null;
         PreparedStatement preparedStatement;
         ResultSet resultSet = null;
-        Group group = new Group();
         List<Group> groups = new ArrayList<>();
         try {
             connection = daoFactory.getConnect();
@@ -29,6 +39,7 @@ public record GroupDaoImpl(DaoFactory daoFactory) implements GroupDao {
             preparedStatement.setInt(1, number);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
+                Group group = new Group();
                 int group_id = resultSet.getInt("group_id");
                 String group_name = resultSet.getString("group_name");
                 group.setGroupId(group_id);
@@ -55,6 +66,9 @@ public record GroupDaoImpl(DaoFactory daoFactory) implements GroupDao {
         return groups;
     }
 
+    /**
+     * @param group Class group object  with parameter to create group in db
+     */
     @Override
     public void create(Group group) {
         ReadSqlFile readSqlFile = new ReadSqlFile();
@@ -86,6 +100,10 @@ public record GroupDaoImpl(DaoFactory daoFactory) implements GroupDao {
         }
     }
 
+    /**
+     * @param id Group id for search
+     * @return list of found groups
+     */
     @Override
     public List<Group> findById(int id) {
         ReadSqlFile readSqlFile = new ReadSqlFile();
@@ -127,6 +145,9 @@ public record GroupDaoImpl(DaoFactory daoFactory) implements GroupDao {
         return groups;
     }
 
+    /**
+     * @return list of found groups
+     */
     @Override
     public List<Group> findAll() {
         ReadSqlFile readSqlFile = new ReadSqlFile();
@@ -164,6 +185,9 @@ public record GroupDaoImpl(DaoFactory daoFactory) implements GroupDao {
         return groups;
     }
 
+    /**
+     * @param group Class group object  with parameter to update group in db
+     */
     @Override
     public void update(Group group) {
         ReadSqlFile readSqlFile = new ReadSqlFile();
@@ -192,6 +216,10 @@ public record GroupDaoImpl(DaoFactory daoFactory) implements GroupDao {
         }
     }
 
+    /**
+     * @param id Group id for delete
+     * @return number of deleted rows
+     */
     @Override
     public int delete(int id) {
         ReadSqlFile readSqlFile = new ReadSqlFile();

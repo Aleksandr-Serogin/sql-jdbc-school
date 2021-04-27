@@ -7,7 +7,6 @@ public class Course {
     private String course_description;
 
     public Course(){
-
     }
 
     public void setCourseId(int course_id) {

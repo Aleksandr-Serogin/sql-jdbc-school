@@ -1,6 +1,7 @@
 package ua.com.foxminded.university.domain.entity;
 
 public class Student {
+
     private int student_id;
     private int group_id;
     private String first_name;

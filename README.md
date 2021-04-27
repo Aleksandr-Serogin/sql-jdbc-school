@@ -63,7 +63,96 @@ Useful links:
 Be aware that videos were made for the Java 6 course. Now we are using Java 8+.
 
 https://youtu.be/bYyKQmYyGZg
-  
  
 https://youtu.be/flMFICpPfcI
- 
+
+`Instuction how run applicatian sql-jdbc-school:`
+
+* Befor run applicatian in docker you must install docker  as in this instruction https://docs.docker.com/desktop/
+
+
+```
+Then can run start_bat or start_sh.
+For stop work close console end run stop_bat or stop_sh scripts.
+```
+
+```
+If app runs but you get errors, cell developers.
+```
+
+* You version.
+
+
+`Integratin tests`
+
+![alt text](docs/Task_7_Test_Code_Coverage.png "Task 7 - Coverage unit tests")
+
+`Sceeshots work:`
+
+`a`
+
+![alt text](docs/a.png)
+
+`b`
+
+![alt text](docs/b.png)
+
+`c`
+
+![alt text](docs/c.png)
+
+`e`
+
+![alt text](docs/e.png)
+
+`f`
+
+![alt text](docs/f.png)
+
+`g`
+
+![alt text](docs/g.png)
+
+`i`
+
+![alt text](docs/i.png)
+
+`k`
+
+![alt text](docs/k.png)
+
+`l`
+
+![alt text](docs/l.png)
+
+`m`
+
+![alt text](docs/m.png)
+
+`n`
+
+![alt text](docs/n.png)
+
+`o`
+
+![alt text](docs/o.png)
+
+`p`
+
+![alt text](docs/p.png)
+
+`q`
+
+![alt text](docs/q.png)
+
+`r`
+
+![alt text](docs/r.png)
+
+`s`
+
+![alt text](docs/s.png)
+
+`t`
+
+![alt text](docs/t.png)

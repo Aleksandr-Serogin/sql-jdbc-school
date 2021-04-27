@@ -3,8 +3,8 @@ version: '3.8'
 services:
 
   app:
-    build: .
-    container_name: app
+    image: serogin/sql-jdbc-school-app
+    container_name: sql-jdbc-school-app
     networks:
       - backend
     depends_on:
@@ -12,8 +12,6 @@ services:
       - db_test
     stdin_open: true
     tty: true
-#    healthcheck:
-#      test: [ "CMD", "curl", "-f", "http://localhost" ]
 
   db_master:
     image: 'postgres:latest'

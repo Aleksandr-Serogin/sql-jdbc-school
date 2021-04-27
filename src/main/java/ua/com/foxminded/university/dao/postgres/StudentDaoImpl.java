@@ -9,8 +9,19 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Date: Apr 27-2021 Class get connect to data base,
+ * return and work with class student object
+ *
+ * @author Aleksandr Serohin
+ * @version 1.0001
+ */
 public record StudentDaoImpl(DaoFactory daoFactory) implements StudentDao {
 
+    /**
+     * @param course_name course name for find them student
+     * @return list find student
+     */
     @Override
     public List<Student> findStudentsByCourseName(String course_name) {
         ReadSqlFile readSqlFile = new ReadSqlFile();
@@ -18,7 +29,6 @@ public record StudentDaoImpl(DaoFactory daoFactory) implements StudentDao {
         Connection connection = null;
         PreparedStatement preparedStatement;
         ResultSet resultSet = null;
-        Student student = new Student();
         List<Student> listStudents = new ArrayList<>();
         try {
             connection = daoFactory.getConnect();
@@ -26,6 +36,7 @@ public record StudentDaoImpl(DaoFactory daoFactory) implements StudentDao {
             preparedStatement.setString(1, course_name);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
+                Student student = new Student();
                 int student_id = resultSet.getInt("student_id");
                 int group_id = resultSet.getInt("group_id");
                 String first_name = resultSet.getString("first_name");
@@ -53,6 +64,10 @@ public record StudentDaoImpl(DaoFactory daoFactory) implements StudentDao {
         return listStudents;
     }
 
+    /**
+     * @param id Student id for delete
+     * @return number of deleted rows
+     */
     @Override
     public int delete(int id) {
         ReadSqlFile readSqlFile = new ReadSqlFile();
@@ -86,6 +101,9 @@ public record StudentDaoImpl(DaoFactory daoFactory) implements StudentDao {
         return numberOfDeletedRows;
     }
 
+    /**
+     * @param student Class student object  with parameter to create student in db
+     */
     @Override
     public void create(Student student) {
         ReadSqlFile readSqlFile = new ReadSqlFile();
@@ -96,9 +114,8 @@ public record StudentDaoImpl(DaoFactory daoFactory) implements StudentDao {
         try {
             connection = daoFactory.getConnect();
             preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setInt(1, student.getGroupId());
-            preparedStatement.setString(2, student.getFirstName());
-            preparedStatement.setString(3, student.getLastName());
+            preparedStatement.setString(1, student.getFirstName());
+            preparedStatement.setString(2, student.getLastName());
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 student.setStudentId(resultSet.getInt(1));
@@ -119,6 +136,10 @@ public record StudentDaoImpl(DaoFactory daoFactory) implements StudentDao {
         }
     }
 
+    /**
+     * @param id Student id for search
+     * @return list of found student
+     */
     @Override
     public List<Student> findById(int id) {
         ReadSqlFile readSqlFile = new ReadSqlFile();
@@ -164,6 +185,9 @@ public record StudentDaoImpl(DaoFactory daoFactory) implements StudentDao {
         return students;
     }
 
+    /**
+     * @return list of found students
+     */
     @Override
     public List<Student> findAll() {
         ReadSqlFile readSqlFile = new ReadSqlFile();
@@ -205,6 +229,9 @@ public record StudentDaoImpl(DaoFactory daoFactory) implements StudentDao {
         return students;
     }
 
+    /**
+     * @param student Class student object  with parameter to update student in db
+     */
     @Override
     public void update(Student student) {
         ReadSqlFile readSqlFile = new ReadSqlFile();

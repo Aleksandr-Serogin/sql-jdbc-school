@@ -5,7 +5,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 /**
- * Date: Feb 16-2021 Class read file
+ * Date: Apr 27-2021 Class read file
  * with setting
  *
  * @author Aleksandr Serohin
@@ -17,17 +17,17 @@ public class ReadProperties {
     private final String user;
     private final String password;
 
-    public ReadProperties( String fileName) {
-        Properties prop = new Properties ();
-        InputStream streamReader = getClass ().getClassLoader ().getResourceAsStream (fileName);
+    public ReadProperties(String fileName) {
+        Properties prop = new Properties();
+        InputStream streamReader = getClass().getClassLoader().getResourceAsStream(fileName);
         try {
-            prop.load ( streamReader );
+            prop.load(streamReader);
         } catch (IOException e) {
-            throw new NumberFormatException ( "File \"db.properties\" hav broken parameter." );
+            throw new NumberFormatException("File \"db.properties\" hav broken parameter.");
         }
-        this.url = prop.getProperty ( "url" );
-        this.user = prop.getProperty ( "user" );
-        this.password = prop.getProperty ( "password" );
+        this.url = prop.getProperty("url");
+        this.user = prop.getProperty("user");
+        this.password = prop.getProperty("password");
     }
 
     public String getUrl() {

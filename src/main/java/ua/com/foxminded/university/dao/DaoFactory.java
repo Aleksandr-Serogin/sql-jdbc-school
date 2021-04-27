@@ -7,22 +7,26 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-public class DaoFactory implements IDaoFactory {
+/**
+ * Date: Apr 27-2021 Class read properties file
+ * and return connect to database
+ *
+ * @author Aleksandr Serohin
+ * @version 1.0001
+ */
+public record DaoFactory(String nameFileProperties) implements IDaoFactory {
 
-    private final String nameFileProperties;
-
-    public DaoFactory(String  nameFileProperties) {
-        this.nameFileProperties = nameFileProperties;
-    }
-
+    /**
+     * @return connect to database
+     * @throws SQLException
+     */
     @Override
     public Connection getConnect() throws SQLException {
-        ReadProperties readProperties = new ReadProperties (nameFileProperties);
-        String url = readProperties.getUrl ();
+        ReadProperties readProperties = new ReadProperties(nameFileProperties);
+        String url = readProperties.getUrl();
         Properties props = new Properties();
-        props.setProperty("user", readProperties.getUser ());
-        props.setProperty("password", readProperties.getPassword ());
-        System.out.println ( "Connected to the PostgreSQL server successfully." );
-        return DriverManager.getConnection ( url, props );
+        props.setProperty("user", readProperties.getUser());
+        props.setProperty("password", readProperties.getPassword());
+        return DriverManager.getConnection(url, props);
     }
 }

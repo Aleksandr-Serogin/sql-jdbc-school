@@ -11,6 +11,13 @@ import ua.com.foxminded.university.domain.entity.Student;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Date: Apr 27-2021 Class show menu for chose in command line,
+ * and work with this chose
+ *
+ * @author Aleksandr Serohin
+ * @version 1.0001
+ */
 public class Coordinator {
 
     private static final String namePropertiesFile = "config.properties";
@@ -20,6 +27,9 @@ public class Coordinator {
     private static final CourseDaoImpl courseDaoImpl = new CourseDaoImpl(daoFactory);
     private static final StudentDaoImpl studentDaoImpl = new StudentDaoImpl(daoFactory);
 
+    /**
+     * Working with chose in command line and return result chose
+     */
     public void startCommandLine() {
         Scanner scanner = new Scanner(System.in);
         while (true) {
@@ -36,7 +46,7 @@ public class Coordinator {
                 String answer = scanner.nextLine();
                 findStudentsByCourse(answer);
             } else if ("c".equals(input)) {
-                System.out.print("Input student full name: <First Name> <Last Name>. Example: Jon Dou." + System.lineSeparator());
+                System.out.print("Input student full name: <First Name>, <Last Name>. Example: Jon, Dou." + System.lineSeparator());
                 String answer = scanner.nextLine();
                 createStudent(answer);
             } else if ("d".equals(input)) {
@@ -44,12 +54,13 @@ public class Coordinator {
                 String answer = scanner.nextLine();
                 deleteStudent(answer);
             } else if ("e".equals(input)) {
-                System.out.print("Input student id and course. Pattern: <student id> <course id>. Example: 150 15." + System.lineSeparator());
+                findAllCourses();
+                System.out.print("Input student id and course. Pattern: <student id>, <course id>. Example: 150, 15." + System.lineSeparator());
                 String answer = scanner.nextLine();
                 setCourseStudent(answer);
             } else if ("f".equals(input)) {
-                System.out.print("Input student id and his/her course. Pattern: <student id> <course id>." +
-                        " Example: 150 15." + System.lineSeparator());
+                System.out.print("Input student id and his/her course. Pattern: <student id>, <course id>." +
+                        " Example: 150, 15." + System.lineSeparator());
                 String answer = scanner.nextLine();
                 deletedCourseStudent(answer);
             } else if ("g".equals(input)) {
@@ -114,6 +125,9 @@ public class Coordinator {
         }
     }
 
+    /**
+     * Show menu for chose in command line
+     */
     public static void showMenu() {
         String menu = "a. Find all groups with less or equals student count" + System.lineSeparator() +
                 "b. Find all students related to course with given name" + System.lineSeparator() +
@@ -154,7 +168,7 @@ public class Coordinator {
         String message = String.format("All students that relate to course %s: ", answer);
         System.out.println(message);
         for (Student student : students) {
-            System.out.println(String.format("%d %d %s %s", student.getStudentId(), student.getGroupId(),
+            System.out.println(String.format("Student id: %d, group id: %d, student name: %s %s", student.getStudentId(), student.getGroupId(),
                     student.getFirstName(), student.getLastName()));
         }
     }
@@ -166,35 +180,45 @@ public class Coordinator {
         student.setLastName(nameStudent[1]);
         studentDaoImpl.create(student);
         String message =
-                String.format("Student %d %s %s has been added.", student.getStudentId(), nameStudent[0], nameStudent[1]);
+                String.format("Student id: %d, student name: %s %s has been added.", student.getStudentId(), nameStudent[0], nameStudent[1]);
         System.out.println(message);
     }
 
     private void setCourseStudent(String answer) {
-        int studentID = Integer.parseInt(answer.split(SPLITERATOR)[0]);
-        int courseID = Integer.parseInt(answer.split(SPLITERATOR)[1]);
+        String[] id = answer.split(SPLITERATOR);
+        int studentID = Integer.parseInt(id[0]);
+        int courseID = Integer.parseInt(id[1]);
         courseDaoImpl.setCourseStudent(studentID, courseID);
-        String message = String.format("Student with id %d has been added to the course %d.",
+        String message = String.format("Student with id: %d has been added to the course with id: %d.",
                 studentID, courseID);
         System.out.println(message);
     }
 
     private void deleteStudent(String answer) {
         int studentID = Integer.parseInt(answer);
-        studentDaoImpl.delete(studentID);
-        String message =
-                String.format("Student %d has been deleted.", studentID);
-        System.out.println(message);
+        int numberOfDeletedRows = studentDaoImpl.delete(studentID);
+        if (numberOfDeletedRows > 0) {
+            String message =
+                    String.format("Student with id: %d, has been deleted.", studentID);
+            System.out.println(message);
+        } else {
+            System.out.println("Nothing delete");
+        }
     }
 
     private void deletedCourseStudent(String answer) {
-        int studentID = Integer.parseInt(answer.split(SPLITERATOR)[0]);
-        int courseID = Integer.parseInt(answer.split(SPLITERATOR)[1]);
-        courseDaoImpl.deletedCourseStudent(studentID, courseID);
+        String[] id = answer.split(SPLITERATOR);
+        int studentID = Integer.parseInt(id[0]);
+        int courseID = Integer.parseInt(id[1]);
+        int numberOfDeletedRows = courseDaoImpl.deletedCourseStudent(studentID, courseID);
+        if (numberOfDeletedRows > 0) {
         String message =
-                String.format("Student with id %d has been deleted from his/her %d course.",
+                String.format("Student with id: %d, has been deleted from his/her course with id: %d.",
                         studentID, courseID);
         System.out.println(message);
+        } else {
+            System.out.println("Nothing delete");
+        }
     }
 
     private void createCourse(String answer) {
@@ -204,7 +228,7 @@ public class Coordinator {
         daoCourse.setCourseDescription(course[1].substring(1));
         courseDaoImpl.create(daoCourse);
         String message =
-                String.format("Course %d %s %s has been added.", daoCourse.getCourseId(), course[0], course[1]);
+                String.format("Course id: %d, name: %s, description: %s, has been added.", daoCourse.getCourseId(), course[0], course[1]);
         System.out.println(message);
     }
 
@@ -213,24 +237,33 @@ public class Coordinator {
         group.setGroupName(answer);
         groupDaoImpl.create(group);
         String message =
-                String.format("Group %d , %s has been added.", group.getGroupId(), answer);
+                String.format("Group id: %d, name: %s, has been added.", group.getGroupId(), answer);
         System.out.println(message);
     }
 
     private void deleteCourse(String answer) {
         int id = Integer.parseInt(answer);
-        courseDaoImpl.delete(id);
+        int numberOfDeletedRows = courseDaoImpl.delete(id);
+        if (numberOfDeletedRows > 0) {
         String message =
-                String.format("Course %d has been delete.", id);
+                String.format("Course id: %d, has been delete.", id);
         System.out.println(message);
+        } else {
+            System.out.println("Nothing delete");
+        }
     }
 
     private void deleteGroup(String answer) {
         int id = Integer.parseInt(answer);
-        groupDaoImpl.delete(id);
+        int numberOfDeletedRows =  groupDaoImpl.delete(id);
+        if (numberOfDeletedRows > 0) {
         String message =
-                String.format("Group %d has been delete.", id);
+                String.format("Group id: %d, has been delete.", id);
         System.out.println(message);
+        } else {
+            System.out.println("Nothing delete");
+        }
+
     }
 
     private void updateStudent(String answer) {
@@ -246,7 +279,7 @@ public class Coordinator {
         daoStudent.setLastName(lastName);
         studentDaoImpl.update(daoStudent);
         String message =
-                String.format("Student %d, %d, %s, %s has been update.", studentId, groupId, firstName, lastName);
+                String.format("Student id: %d, group: %d, name: %s %s, has been update.", studentId, groupId, firstName, lastName);
         System.out.println(message);
     }
 
@@ -261,20 +294,20 @@ public class Coordinator {
         daoCourse.setCourseDescription(courseDescription);
         courseDaoImpl.update(daoCourse);
         String message =
-                String.format("Group %d , %s, %s has been update.", courseId, courseName, courseDescription);
+                String.format("Course id: %d, name: %s, description: %s, has been update.", courseId, courseName, courseDescription);
         System.out.println(message);
     }
 
     private void updateGroup(String answer) {
         String[] course = answer.split(",");
-        int groupId = Integer.parseInt(course[0].substring(1));
-        String groupName = course[1];
+        int groupId = Integer.parseInt(course[0]);
+        String groupName = course[1].substring(1);
         Group group = new Group();
         group.setGroupId(groupId);
         group.setGroupName(groupName);
         groupDaoImpl.update(group);
         String message =
-                String.format("Group %d , %s has been update.", groupId, groupName);
+                String.format("Group id: %d, name: %s, has been update.", groupId, groupName);
         System.out.println(message);
     }
 
@@ -297,8 +330,7 @@ public class Coordinator {
         List<Group> groups = groupDaoImpl.findAll();
         System.out.println("All groups at school:");
         System.out.println("ID\tName");
-        for (
-                Group group : groups) {
+        for (Group group : groups) {
             int groupId = group.getGroupId();
             String groupName = group.getGroupName();
             System.out.println(String.format("%d\t%s", groupId, groupName));
@@ -320,13 +352,13 @@ public class Coordinator {
 
     private void findStudent(String answer) {
         int id = Integer.parseInt(answer);
-        List<Student> students  = studentDaoImpl.findById(id);
+        List<Student> students = studentDaoImpl.findById(id);
         for (Student student : students) {
             int studentId = student.getStudentId();
             int groupID = student.getGroupId();
             String firstName = student.getFirstName();
             String lastName = student.getLastName();
-            System.out.println(String.format("%d\t\t%d\t\t%s %s", studentId, groupID, firstName, lastName));
+            System.out.println(String.format("Student id: %d, group id: %d, name: %s %s", studentId, groupID, firstName, lastName));
         }
     }
 
@@ -345,7 +377,7 @@ public class Coordinator {
         for (Group group : groups) {
             int groupId = group.getGroupId();
             String groupName = group.getGroupName();
-            System.out.println(String.format("Group id: %d , name: %s.", groupId, groupName));
+            System.out.println(String.format("Group id: %d, name: %s.", groupId, groupName));
         }
     }
 

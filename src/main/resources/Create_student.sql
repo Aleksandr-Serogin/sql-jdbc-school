@@ -1,1 +1,1 @@
-SELECT * FROM university.createStudent(?, ?, ?);
+SELECT * FROM university.createStudent(?, ?);
